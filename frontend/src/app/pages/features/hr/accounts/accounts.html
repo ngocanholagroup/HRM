@@ -1,0 +1,378 @@
+<div class="page-container">
+  <!-- Header & Title -->
+  <div class="header-section">
+    <div>
+      <h2>Quản lý Tài khoản</h2>
+      <p class="subtitle">Quản lý thông tin nhân viên, tài khoản và phân quyền</p>
+    </div>
+
+    <!-- Quick Filter Bar -->
+    <div class="quick-filter">
+      
+      <!-- SEARCH BOX VỚI LIVE SUGGESTION -->
+      <div class="search-box">
+        <span class="material-symbols-outlined icon">search</span>
+        
+        <!-- Input gõ tìm kiếm -->
+        <input 
+          type="text" 
+          placeholder="Tìm theo Mã NV..." 
+          [(ngModel)]="filter.userID"
+          (input)="onSearchInput($event)"
+          (blur)="hideSuggestions()"
+          (keyup.enter)="onPageSizeChange()"
+          autocomplete="off" 
+        />
+        
+        <!-- Loading Indicator nhỏ (tùy chọn) -->
+        <div class="spinner-mini" *ngIf="isSearching"></div>
+
+        <!-- POPUP GỢI Ý -->
+        <div class="suggestions-dropdown" *ngIf="showSuggestions">
+          <!-- Danh sách kết quả -->
+          <ng-container *ngIf="searchSuggestions.length > 0  ; else noSuggestion">
+            <div 
+              class="suggestion-item" 
+              *ngFor="let item of searchSuggestions | slice:0:5" 
+              (mousedown)="selectSuggestion(item)"
+            >
+              
+              <div class="s-info">
+                <span class="s-id">#{{ item.username }}</span>
+                <span class="s-name">{{ item.fullname }}</span>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Không tìm thấy -->
+          <ng-template #noSuggestion>
+            <div class="no-results">
+              <span class="material-symbols-outlined">person_off</span>
+              <span>Không tìm thấy nhân viên</span>
+            </div>
+          </ng-template>
+        </div>
+
+      </div>
+      <!-- END SEARCH BOX -->
+
+      <button class="btn-primary" (click)="onPageSizeChange()">
+        <span class="material-symbols-outlined">filter_list</span> Lọc
+      </button>
+      <button class="btn-secondary" [class.active]="showAdvancedFilter" (click)="toggleAdvancedFilter()">
+        <span class="material-symbols-outlined">tune</span> Nâng cao
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced Filter Panel -->
+  <div class="advanced-filter-panel" *ngIf="showAdvancedFilter">
+    <div class="filter-grid">
+      <div class="form-group">
+        <label>Từ khóa chung</label>
+        <input type="text" placeholder="Tên, CCCD, Email..." [(ngModel)]="filter.keyword" />
+      </div>
+
+      <div class="form-group">
+        <label>Phòng ban</label>
+        <select [(ngModel)]="filter.departmentId">
+          
+          <option *ngFor="let dept of department" [value]="dept.departmentId">{{ dept.departmentName }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select [(ngModel)]="filter.status">
+          <option value="">-- Tất cả --</option>
+          <option value="active">Hoạt động</option>
+          <option value="inactive">Ngừng hoạt động</option>
+        </select>
+      </div>
+
+      <div class="form-group date-range">
+        <label>Ngày vào làm</label>
+        <div class="date-inputs">
+          <input type="date" [(ngModel)]="filter.hireDateStart" (change)="onHireDateStartChange()" />
+          <span class="separator">➝</span>
+          <input type="date" [(ngModel)]="filter.hireDateEnd" />
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-text" (click)="toggleAdvancedFilter()">Đóng</button>
+      <button class="btn-primary" (click)="applyAdvancedFilter()">Áp dụng bộ lọc</button>
+    </div>
+  </div>
+
+  <!-- Table Section -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="modern-table" *ngIf="employee && employee.length > 0 && employee[0]?.length > 0; else noData">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="sort('id')" style="width: 80px;">
+              Mã NV <span class="material-symbols-outlined sort-indicator"
+                [class.rotated]="sortByIdDesc">arrow_drop_down</span>
+            </th>
+            <th class="sortable" (click)="sort('name')">
+              Nhân viên <span class="material-symbols-outlined sort-indicator"
+                [class.rotated]="sortByUsernameDesc">arrow_drop_down</span>
+            </th>
+            <th>Liên hệ</th>
+            <th class="sortable" (click)="sort('gender')">
+              Giới tính <span class="material-symbols-outlined sort-indicator"
+                [class.rotated]="sortByGenderDesc">arrow_drop_down</span>
+            </th>
+            <th class="sortable" (click)="sort('born')">
+              Ngày sinh <span class="material-symbols-outlined sort-indicator"
+                [class.rotated]="sortByBirthdayDesc">arrow_drop_down</span>
+            </th>
+            <th>Phòng ban</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let emp of employee[0]">
+            <td><strong>#{{ emp.username }}</strong></td>
+
+            <!-- Cột Nhân viên: Avatar + Tên + Username -->
+            <td>
+              <div class="user-info">
+                <div class="avatar-circle" [ngClass]="{'female': emp.gender === false}">
+                  {{ emp.fullname ? emp.fullname.charAt(0) : 'U' }}
+                </div>
+                <div class="info-text">
+                  <div class="fullname">{{ emp.fullname || 'Chưa cập nhật' }}</div>
+                  <div class="username">@{{ emp.userID }}</div>
+                  <div class="cccd-text" title="CCCD"><small>{{ emp.cccd }}</small></div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Cột Liên hệ: Email + SĐT -->
+            <td>
+              <div class="contact-info">
+                <div class="email" title="{{ emp.email }}">{{ emp.email || '-' }}</div>
+                <div class="phone">{{ emp.phonenumber || '-' }}</div>
+              </div>
+            </td>
+
+            <!-- Giới tính -->
+            <td>
+              <span class="badge" [ngClass]="emp.gender ? 'male' : 'female'">
+                {{ emp.gender === 'MALE' ? 'Nam' : (emp.gender === 'FEMALE' ? 'Nữ' : 'N/A') }}
+              </span>
+            </td>
+
+            <td>{{ emp.birth | date:'dd/MM/yyyy' }}</td>
+
+            <td>
+              <span class="dept-badge">{{ emp.departmentName || 'Chưa phân bổ' }}</span>
+            </td>
+
+            <td class="text-center">
+              <button class="btn-icon" (click)="openEditModal(emp)" title="Chỉnh sửa">
+                <span class="material-symbols-outlined">edit_square</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    <div class="pagination-footer" *ngIf="employee && employee.length > 0 && employee[0]?.length > 0">
+      <div class="page-size-selector">
+        <span>Hiển thị</span>
+        <select [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }}</option>
+        </select>
+        <span>dòng / trang</span>
+      </div>
+
+      <div class="page-info">
+        {{ currentPage * pageSize + 1 }} - {{ (currentPage + 1) * pageSize > totalElements ? totalElements :
+        (currentPage + 1) * pageSize }}
+        trong tổng số <strong>{{ totalElements }}</strong>
+      </div>
+
+      <div class="page-controls">
+        <button class="btn-page" [disabled]="currentPage === 0" (click)="onPageChange(currentPage - 1)">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="current-page">Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+        <button class="btn-page" [disabled]="currentPage >= totalPages - 1" (click)="onPageChange(currentPage + 1)">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <ng-template #noData>
+      <div class="empty-state">
+        <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" alt="No Data" width="64">
+        <p>Không tìm thấy dữ liệu nhân viên nào.</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Modal Edit -->
+<div class="overlay" *ngIf="selectedEmployee">
+  <div class="modal-box">
+    <!-- Sử dụng ngForm để validation hoạt động -->
+    <form #editForm="ngForm">
+      <div class="modal-header">
+        <div class="header-content">
+          <h3>Chỉnh sửa thông tin</h3>
+          <p>Cập nhật hồ sơ cho nhân viên #{{ selectedEmployee.userID }}</p>
+        </div>
+        <span class="close-btn" (click)="cancelEdit()">
+          <span class="material-symbols-outlined">close</span>
+        </span>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Thông tin cơ bản -->
+          <div class="form-section-title">Thông tin cơ bản</div>
+
+          <div class="form-group">
+            <label>Username <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.username" name="username" disabled class="input-disabled" required />
+          </div>
+
+          <div class="form-group">
+            <label>Họ và tên <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.fullname" name="fullname" required #fullname="ngModel"
+                   [class.invalid]="fullname.invalid && (fullname.dirty || fullname.touched)"/>
+            <div *ngIf="fullname.invalid && (fullname.dirty || fullname.touched)" class="error-msg">
+              Vui lòng nhập họ tên.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Giới tính <span class="text-danger">*</span></label>
+            <select [(ngModel)]="selectedEmployee.gender" name="gender" required #gender="ngModel"
+                    [class.invalid]="gender.invalid && (gender.dirty || gender.touched)">
+              <option [ngValue]="'MALE'">Nam</option>
+              <option [ngValue]="'FEMALE'">Nữ</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ngày sinh <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.birth" name="birth" type="date" required #birth="ngModel"
+                   [class.invalid]="birth.invalid && (birth.dirty || birth.touched)" />
+          </div>
+
+          <div class="form-group">
+            <label>CCCD <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.cccd" name="cccd" maxlength="12" required #cccd="ngModel"
+                   [class.invalid]="cccd.invalid && (cccd.dirty || cccd.touched)" />
+          </div>
+
+          <!-- Liên hệ & Công việc -->
+          <div class="form-section-title full-width">Liên hệ & Công việc</div>
+
+          <div class="form-group">
+            <label>Email <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.email" name="email" type="email" required #email="ngModel"
+                   [class.invalid]="email.invalid && (email.dirty || email.touched)" />
+          </div>
+
+          <div class="form-group">
+            <label>SĐT <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.phonenumber" name="phonenumber" maxlength="10" required #phone="ngModel"
+                   [class.invalid]="phone.invalid && (phone.dirty || phone.touched)"/>
+          </div>
+
+          <div class="form-group">
+            <label>Ngày vào làm <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.hireDate" name="hireDate" type="date" required #hireDate="ngModel"
+                   [class.invalid]="hireDate.invalid && (hireDate.dirty || hireDate.touched)" />
+          </div>
+
+          <div class="form-group">
+            <label>Phòng ban <span class="text-danger">*</span></label>
+            <select [(ngModel)]="selectedEmployee.departmentID" name="departmentID" required #dept="ngModel"
+                    [class.invalid]="dept.invalid && (dept.dirty || dept.touched)">
+              <option *ngFor="let dept of department" [value]="dept.departmentId">{{ dept.departmentName }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Chức vụ (Role) <span class="text-danger">*</span></label>
+            <select [(ngModel)]="selectedEmployee.roleName" name="roleName"  required>
+              <option value="Admin">Admin</option>
+              <option value="HR">HR</option>
+              <option value="Manager">Manager</option>
+              <option value="Employee">Employee</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Trạng thái <span class="text-danger">*</span></label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" [(ngModel)]="selectedEmployee.status" name="status" value="active" required />
+                <span>Hoạt động</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" [(ngModel)]="selectedEmployee.status" name="status" value="inactive" required />
+                <span>Ngừng hoạt động</span>
+              </label>
+            </div>
+            <!-- Validation cho radio group hơi đặc biệt, chỉ hiển thị nếu form đã submit mà chưa chọn -->
+            <div *ngIf="editForm.submitted && !selectedEmployee.status" class="error-msg">
+              Vui lòng chọn trạng thái.
+            </div>
+          </div>
+
+          <!-- Tài chính -->
+          <div class="form-section-title full-width">Thông tin tài chính & Địa chỉ</div>
+
+          <div class="form-group full-width">
+            <label>Địa chỉ <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.address" name="address" required #address="ngModel"
+                   [class.invalid]="address.invalid && (address.dirty || address.touched)"/>
+            <div *ngIf="address.invalid && (address.dirty || address.touched)" class="error-msg">
+              Vui lòng nhập địa chỉ.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Tên Ngân hàng <span class="text-danger">*</span></label>
+            <input [(ngModel)]="selectedEmployee.bankName" name="bankName" required #bankName="ngModel"
+                   [class.invalid]="bankName.invalid && (bankName.dirty || bankName.touched)"/>
+            <div *ngIf="bankName.invalid && (bankName.dirty || bankName.touched)" class="error-msg">
+               Vui lòng nhập tên ngân hàng.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Số tài khoản <span class="text-danger">*</span></label>
+            <input type="number" [(ngModel)]="selectedEmployee.bankAccount" name="bankAccount" required #bankAccount="ngModel"
+                   [class.invalid]="bankAccount.invalid && (bankAccount.dirty || bankAccount.touched)"/>
+             <div *ngIf="bankAccount.invalid && (bankAccount.dirty || bankAccount.touched)" class="error-msg">
+               Vui lòng nhập số tài khoản.
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-text" (click)="cancelEdit()">Hủy bỏ</button>
+        <!-- Disable nút Lưu nếu form chưa hợp lệ -->
+        <button class="btn-primary" [disabled]="editForm.invalid" (click)="saveEmployee(selectedEmployee)">Lưu thay đổi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Shared Components -->
+<app-loading *ngIf="isloading"></app-loading>
+<app-comfirm *ngIf="isconfirm" [message]="confirmMessage" (result)="onConfirmResult($event)"></app-comfirm>
+<app-alert *ngIf="isalert" [message]="notifyMessage" [notifyType]="notifyType" (hidden)="isalert = false"></app-alert>

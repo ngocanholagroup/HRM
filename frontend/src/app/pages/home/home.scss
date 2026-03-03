@@ -1,0 +1,652 @@
+// Import theme variables
+@use '../../styles/theme';
+
+// --- 1. GLOBAL SETTINGS ---
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--theme-bg-primary);
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--theme-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+// --- 2. HEADER (TASK BAR) ---
+.task-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: var(--theme-header-bg);
+    color: white;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px var(--theme-card-shadow);
+    display: flex;
+    justify-content: space-between; // Thay đổi để chứa nút menu bên trái
+    align-items: center;
+    z-index: 101; // Tăng z-index để nằm trên sidebar khi sidebar chưa mở hoặc overlay
+    transition: all 0.3s;
+}
+
+// Mobile Menu Button
+.mobile-menu-btn {
+    display: none; // Ẩn trên desktop
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background 0.2s;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    span {
+        font-size: 28px;
+    }
+}
+
+// User Actions
+.user-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-left: auto; // Đẩy về bên phải
+
+    .notification-wrapper {
+        position: relative;
+
+        .notification-icon-box {
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .bell-icon {
+                font-size: 24px;
+                color: #fff;
+            }
+
+            .badge {
+                position: absolute;
+                top: 0;
+                right: 0;
+                background-color: #ff4757;
+                color: white;
+                font-size: 10px;
+                font-weight: bold;
+                padding: 2px 5px;
+                border-radius: 10px;
+                min-width: 18px;
+                text-align: center;
+                border: 2px solid #1c2655;
+                animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            }
+        }
+
+        .notification-menu {
+            position: absolute;
+            top: 130%;
+            right: -60px;
+            background: var(--theme-dropdown-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px var(--theme-card-shadow);
+            width: 350px;
+            max-width: 90vw;
+            overflow: hidden;
+            z-index: 102;
+            animation: slideDownSubmenu 0.2s ease-out;
+            transform-origin: top right;
+            transition: background-color 0.3s ease;
+
+            .notifi-header {
+                padding: 15px 20px;
+                border-bottom: 1px solid var(--theme-border-light);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-weight: 600;
+                color: var(--theme-text-primary);
+                background-color: var(--theme-notification-header-bg);
+                transition: background-color 0.3s ease, color 0.3s ease;
+
+                .count-tag {
+                    background-color: #ffeaa7;
+                    color: #d63031;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                }
+            }
+
+            .notifi-body {
+                max-height: 400px;
+                overflow-y: auto;
+
+                .empty-notifi {
+                    padding: 30px;
+                    text-align: center;
+                    color: var(--theme-text-tertiary);
+                }
+
+                .notifi-item {
+                    display: flex;
+                    padding: 15px 20px;
+                    border-bottom: 1px solid var(--theme-border-light);
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    gap: 15px;
+
+                    &:hover {
+                        background-color: var(--theme-notification-item-hover);
+                    }
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    .notifi-icon {
+                        background-color: #ffe0e0;
+                        color: #ff7675;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                    }
+
+                    .notifi-content {
+                        flex: 1;
+
+                        .notifi-title {
+                            font-size: 0.9rem;
+                            font-weight: 600;
+                            color: var(--theme-text-primary);
+                            margin-bottom: 2px;
+                        }
+
+                        .notifi-subtitle {
+                            font-size: 0.85rem;
+                            color: var(--theme-text-secondary);
+                            margin-bottom: 4px;
+                        }
+
+                        .notifi-time.warning {
+                            color: #d63031;
+                            font-weight: 500;
+                            font-size: 0.8rem;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    .add-dropdown,
+    .user-dropdown {
+        position: relative;
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            object-fit: cover;
+            transition: border-color 0.2s;
+
+            &:hover {
+                border-color: #fff;
+            }
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 130%;
+            right: 0;
+            background: var(--theme-dropdown-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px var(--theme-card-shadow);
+            min-width: 180px;
+            overflow: hidden;
+            z-index: 101;
+            padding: 5px 0;
+            transition: background-color 0.3s ease;
+
+            .menu-btn,
+            .logout-btn {
+                width: 100%;
+                background: none;
+                border: none;
+                text-align: left;
+                padding: 12px 20px;
+                cursor: pointer;
+                font-size: 14px;
+                color: var(--theme-text-primary);
+                transition: background 0.1s, color 0.1s;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+
+                &:hover {
+                    background: var(--theme-dropdown-hover);
+                    color: var(--theme-text-primary);
+                }
+            }
+
+            .theme-btn {
+                .theme-icon {
+                    font-size: 18px;
+                }
+            }
+
+            .logout-btn {
+                border-top: 1px solid var(--theme-border-light);
+                color: var(--theme-btn-danger);
+
+                &:hover {
+                    background: rgba(255, 71, 87, 0.1);
+                    color: var(--theme-btn-danger);
+                }
+            }
+        }
+    }
+}
+
+// --- SETTINGS MODAL ---
+.settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--theme-modal-overlay);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.settings-modal {
+    background: var(--theme-modal-bg);
+    width: 90%;
+    max-width: 500px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px var(--theme-card-shadow);
+    overflow: hidden;
+    animation: slideUp 0.3s;
+    transition: background-color 0.3s ease;
+
+    .settings-header {
+        padding: 20px 25px;
+        background-color: var(--theme-modal-bg);
+        border-bottom: 1px solid var(--theme-border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+
+        h3 {
+            margin: 0;
+            color: var(--theme-text-primary);
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--theme-text-tertiary);
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s, color 0.2s;
+
+            &:hover {
+                background-color: var(--theme-dropdown-hover);
+                color: var(--theme-btn-danger);
+            }
+
+            span {
+                font-size: 24px;
+            }
+        }
+    }
+
+    .settings-body {
+        padding: 25px;
+    }
+}
+
+// --- 3. SIDEBAR (LEFT HANDLE) ---
+.left_handle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 4rem; // 64px
+    background-color: var(--theme-sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    z-index: 100; // Thấp hơn header một chút hoặc ngang bằng, nhưng cần xử lý mobile
+    padding-top: 60px; // Thêm padding top để tránh bị header che mất nội dung bên trong
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
+    white-space: nowrap;
+    box-shadow: 2px 0 5px var(--theme-card-shadow);
+
+    &:hover {
+        width: 16rem;
+
+        .link-text {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .namelogo {
+            display: block;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-item {
+            .menu-icon.active+.submenu {
+                display: block;
+                animation: slideDownSubmenu 0.3s ease;
+            }
+        }
+    }
+
+    // --- LOGO SECTION ---
+    .nav-links {
+        height: 4rem;
+        width: 100%;
+        /* margin-bottom: 2rem; */
+        padding: 0;
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            width: 100%;
+            height: 100%;
+
+            img {
+                width: 2.5rem;
+                height: 2.5rem;
+                min-width: 2.5rem;
+                border-radius: 8px;
+                background: #fff;
+                object-fit: contain;
+                padding: 2px;
+                margin-left: calc((4rem - 2.5rem) / 2);
+            }
+        }
+    }
+
+    .namelogo {
+        display: none;
+        font-size: 1.2rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #fff;
+        margin-left: 1rem;
+    }
+
+    // --- MENU ITEMS ---
+    .menu-item {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 5px;
+
+        .menu-icon {
+            color: #bdc3c7;
+            text-decoration: none;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background-color: transparent;
+                transition: background-color 0.2s;
+            }
+
+            &:hover {
+                background-color: var(--theme-sidebar-hover);
+                color: #fff;
+            }
+
+            &.active {
+                color: #fff;
+                background-color: var(--theme-sidebar-active);
+
+                &::before {
+                    background-color: #2ed573;
+                }
+            }
+
+            .icon {
+                font-size: 1.4rem;
+                width: 4rem;
+                min-width: 4rem;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-shrink: 0;
+            }
+        }
+
+        .submenu {
+            width: 100%;
+            display: none;
+            background-color: rgba(0, 0, 0, 0.2);
+
+            .submenu-link {
+                display: flex;
+                align-items: center;
+                color: #a4b0be;
+                text-decoration: none;
+                font-size: 0.9rem;
+                transition: 0.2s;
+                height: 40px;
+
+                &:hover {
+                    color: #fff;
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
+
+                &.active {
+                    color: #2ed573;
+                    font-weight: 600;
+                }
+
+                .sub-icon {
+                    font-size: 6px;
+                    width: 4rem;
+                    min-width: 4rem;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+        }
+    }
+
+    .link-text {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease 0.1s;
+        white-space: nowrap;
+    }
+}
+
+
+// --- 4. MAIN CONTENT AREA ---
+.main-body-container {
+    padding-top: 60px;
+    padding-left: 4rem;
+    transition: padding-left 0.3s ease;
+    width: 100%;
+
+    .content-outlet {
+        width: 100%;
+        position: relative;
+    }
+}
+
+// --- OVERLAY ---
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--theme-modal-overlay);
+    z-index: 100; // Dưới sidebar mobile (nếu sidebar là 101+)
+    backdrop-filter: blur(2px);
+    animation: fadeIn 0.3s;
+}
+
+// --- 5. RESPONSIVE ---
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: block; // Hiện nút menu
+    }
+
+    .sidebar-overlay {
+        display: block; // Hiện overlay khi cần (kết hợp với *ngIf trong HTML)
+        z-index: 110;
+    }
+
+    .left_handle {
+        transform: translateX(-100%);
+        width: 16rem; // Full width khi mở
+        z-index: 120; // Cao hơn overlay
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
+
+        &.open {
+            transform: translateX(0);
+
+            // Khi mở trên mobile, hiển thị đầy đủ text và logo như khi hover desktop
+            .link-text {
+                opacity: 1;
+                visibility: visible;
+                transform: translateX(0);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .namelogo {
+                display: block;
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            // Cho phép menu con hiển thị
+            .menu-item {
+                .menu-icon.active+.submenu {
+                    display: block;
+                }
+            }
+        }
+    }
+
+    .main-body-container {
+        padding-left: 0;
+    }
+
+    .task-bar {
+        padding-left: 15px;
+        // z-index: 115; // Giữ header luôn nổi
+    }
+
+    .user-actions {
+        gap: 10px;
+
+        .notification-wrapper .notification-menu {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            max-width: 100%;
+            border-radius: 0 0 12px 12px;
+            right: auto;
+            transform: none;
+        }
+    }
+}
+
+// --- ANIMATIONS ---
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDownSubmenu {
+    from {
+        transform: translateY(-5px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

@@ -1,0 +1,147 @@
+<div class="salary-cycle-container">
+  <div class="main-wrapper">
+    
+    <!-- HEADER -->
+    <div class="header-card">
+      <div class="header-info">
+        <h1 class="page-title">
+          Quản Lý Thuế
+        </h1>
+        <p class="page-subtitle">Cấu hình các loại thuế và tham số hệ thống</p>
+      </div>
+
+      <div class="header-actions">
+        <!-- Search Bar -->
+        <div class="search-box">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" class="search-input" placeholder="Tìm mã thuế..." [(ngModel)]="searchQuery" (keyup.enter)="onSearch()">
+        </div>
+
+        <!-- Buttons -->
+        <button class="btn-refresh" (click)="loadData()" title="Tải lại">
+           <span class="material-symbols-outlined">refresh</span>
+        </button>
+        
+        <button class="btn-primary" (click)="openCreateModal()">
+          <span class="material-symbols-outlined">add</span>
+          Thêm Mới
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN TABLE CONTENT -->
+    <div class="table-container">
+      <div *ngIf="taxList.length === 0 && !isloading" class="empty-state">
+         <span class="material-symbols-outlined" style="font-size: 48px; color: #d1d5db;">folder_off</span>
+         <p>Không tìm thấy dữ liệu nào.</p>
+      </div>
+
+      <div *ngIf="taxList.length > 0" class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th>Mã (Key)</th>
+              <th class="text-right">Giá Trị</th>
+              <th>Ngày Hiệu Lực</th>
+              <th>Mô Tả</th>
+              <th class="text-center">Trạng Thái</th>
+              <th class="text-right">Hành Động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of taxList" class="table-row">
+              <td class="text-muted">#{{ item.id }}</td>
+              <td>
+                <span class="key-badge">{{ item.settingKey }}</span>
+              </td>
+              <td class="text-right font-bold text-primary">{{ item.value }}%</td>
+              <td>{{ item.effectiveDate | date:'dd/MM/yyyy' }}</td>
+              <td class="description-cell">{{ item.description || '-' }}</td>
+              <td class="text-center">
+                <span class="status-badge" [ngClass]="item.isActive ? 'status-success' : 'status-error'">
+                  {{ item.isActive ? 'Hoạt động' : 'Ngưng' }}
+                </span>
+              </td>
+              <td class="text-right">
+                <button class="btn-icon edit" (click)="openEditModal(item)" title="Chỉnh sửa">
+                  <span class="material-symbols-outlined">edit</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FORM -->
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <span class="material-symbols-outlined icon-primary">
+            {{ isEditing ? 'edit_note' : 'add_circle' }}
+          </span>
+          {{ isEditing ? 'Cập Nhật Thuế' : 'Thêm Thuế Mới' }}
+        </h3>
+        <button class="close-btn" (click)="closeModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <form [formGroup]="taxForm" (ngSubmit)="onSubmit()" class="modal-body">
+        <!-- Key -->
+        <div class="form-group">
+          <label class="form-label">Mã Cài Đặt (Key) <span class="required">*</span></label>
+          <input type="text" formControlName="settingKey" class="form-input" placeholder="VD: VAT_G">
+          <div class="error-msg" *ngIf="isFieldInvalid('settingKey')">Vui lòng nhập mã cài đặt.</div>
+        </div>
+
+        <!-- Value & Date -->
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label">Giá Trị (%) <span class="required">*</span></label>
+            <input type="number" formControlName="value" class="form-input" placeholder="0">
+            <div class="error-msg" *ngIf="isFieldInvalid('value')">Giá trị không hợp lệ.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày Hiệu Lực <span class="required">*</span></label>
+            <input type="date" formControlName="effectiveDate" class="form-input">
+            <div class="error-msg" *ngIf="isFieldInvalid('effectiveDate')">Ngày không hợp lệ.</div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">Mô Tả</label>
+          <textarea formControlName="description" rows="3" class="form-input" placeholder="Nhập mô tả chi tiết..."></textarea>
+        </div>
+
+        <!-- Toggle Switch -->
+        <div class="form-group">
+           <label class="toggle-switch">
+              <div class="relative">
+                 <input type="checkbox" formControlName="isActive" class="visually-hidden">
+                 <div class="toggle-bg"></div>
+              </div>
+              <span class="toggle-label">Kích hoạt trạng thái này</span>
+           </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Hủy</button>
+          <button type="submit" class="btn-submit" [disabled]="taxForm.invalid || isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-sm"></span>
+            {{ isSubmitting ? 'Đang lưu...' : 'Lưu Lại' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SHARED COMPONENTS -->
+<app-loading *ngIf="isloading"></app-loading>
+<app-comfirm *ngIf="isconfirm" [message]="confirmMessage" (result)="onConfirmResult($event)"></app-comfirm>
+<app-alert *ngIf="isalert" [message]="alertmessage" [notifyType]="alertType" (hidden)="isalert = false"></app-alert>

@@ -1,0 +1,179 @@
+<div class="overlay" [class.show]="isOpen">
+  <div class="popup zoom-in">
+    <!-- Header -->
+    <div class="popup-header">
+      <h3>Đăng ký lịch làm việc</h3>
+      <button class="close-btn" (click)="closePopup()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    
+    <!-- Body -->
+    <div class="popup-content">
+      <form #f="ngForm" (ngSubmit)="submit()">
+
+        <!-- Date Range Picker -->
+        <div class="form-group">
+            <label>Thời gian đăng ký</label>
+            <div class="date-range-group">
+                <div class="date-input">
+                    <span class="sub-label">Từ ngày</span>
+                    <input 
+                      type="date"
+                      [(ngModel)]="fromDate"
+                      name="fromDate"
+                      required
+                      class="form-control"
+                    />
+                </div>
+                <div class="date-input">
+                    <span class="sub-label">Đến ngày</span>
+                    <input 
+                      type="date"
+                      [(ngModel)]="toDate"
+                      name="toDate"
+                      required
+                      class="form-control"
+                    />
+                </div>
+            </div>
+        </div>
+
+        <!-- Shift Type (Radio Cards) for Range -->
+        <div class="form-group">
+            <label>Loại ca (Cho cả giai đoạn)</label>
+            <div class="type-group">
+              <label class="radio-card" [class.active]="r8.checked">
+                <input 
+                  #r8
+                  type="radio"
+                  name="type"
+                  (change)="changeType(8)"
+                  value="8"
+                  required
+                />
+                <div class="card-content">
+                    <span class="card-title">Ca 8 Tiếng</span>
+                    <span class="card-desc">Tiêu chuẩn</span>
+                </div>
+              </label>
+    
+              <label class="radio-card" [class.active]="r6.checked">
+                <input 
+                  #r6
+                  type="radio"
+                  name="type"
+                  (change)="changeType(6)"
+                  value="6"
+                  required
+                />
+                <div class="card-content">
+                    <span class="card-title">Ca 6 Tiếng</span>
+                    <span class="card-desc">Bán thời gian</span>
+                </div>
+              </label>
+            </div>
+        </div>
+
+        <!-- Range Shift Select -->
+        <div class="form-group">
+            <label>Chọn ca chính</label>
+            <div class="select-wrapper">
+                <select 
+                  [(ngModel)]="rangeShiftId" 
+                  name="rangeShiftId"
+                  required
+                  class="form-control"
+                >
+                  <option value="" disabled selected>-- Chọn ca mặc định --</option>
+                  <option *ngFor="let s of list" [value]="s.shift_id">
+                    {{ s.shift_name }} ({{ s.start_time }} - {{ s.end_time }})
+                  </option>
+                  <optgroup label="Nghỉ phép">
+                      <option value="53">AL (Phép năm)</option>
+                      <option value="54">SL (Nghỉ ốm)</option>
+                      <option value="55">PL (Việc riêng)</option>
+                      <option value="56">ML (Thai sản)</option>
+                      <option value="57">UL (Không lương)</option>
+                  </optgroup>
+                </select>
+            </div>
+        </div>
+
+        <!-- Specific Days Section -->
+        <div class="form-group specific-days-section">
+            <div class="section-header">
+                <label>Các ngày khác (Tùy chọn)</label>
+                <button type="button" class="btn-add-mini" (click)="addSpecificDay()">
+                    + Thêm ca khác
+                </button>
+            </div>
+
+            <div class="specific-item" *ngFor="let item of specificDays; let i = index">
+                <div class="specific-inputs">
+                    <input 
+                        type="date" 
+                        [(ngModel)]="item.date" 
+                        [name]="'specDate' + i"
+                        required
+                        class="form-control"
+                        placeholder="Ngày"
+                    />
+                    <select 
+                        [(ngModel)]="item.shiftId" 
+                        [name]="'specShift' + i"
+                        required
+                        class="form-control"
+                    >
+                        <option value="" disabled selected>Chọn ca</option>
+                        <option *ngFor="let s of list" [value]="s.shift_id">
+                            {{ s.shift_name }}
+                        </option>
+                        <optgroup label="Nghỉ phép">
+                            <option value="53">AL</option>
+                            <option value="54">SL</option>
+                            <option value="55">PL</option>
+                            <option value="56">ML</option>
+                            <option value="57">UL</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <button type="button" class="btn-remove" (click)="removeSpecificDay(i)">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </div>
+            
+            <p *ngIf="specificDays.length === 0" class="hint-text">
+                Nếu không chọn ngày cụ thể, ca chính sẽ áp dụng cho toàn bộ giai đoạn.
+            </p>
+        </div>
+        
+      </form>
+    </div>
+    
+    <!-- Footer -->
+    <div class="popup-footer">
+      <button class="btn btn-cancel" (click)="closePopup()">Hủy</button>
+      <button class="btn btn-save" (click)="f.ngSubmit.emit()" [disabled]="f.invalid">
+        <span *ngIf="!isloading">Đăng ký ngay</span>
+        <span *ngIf="isloading">Đang xử lý...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Global Components -->
+<app-loading *ngIf="isloading"></app-loading>
+
+<app-comfirm 
+  *ngIf="isconfirm" 
+  [message]="confirmMessage" 
+  (result)="onConfirmResult($event)">
+</app-comfirm>
+
+<app-alert 
+  *ngIf="isalert" 
+  [message]="alertmessage" 
+  [notifyType]="alertType" 
+  (hidden)="isalert = false">
+</app-alert>

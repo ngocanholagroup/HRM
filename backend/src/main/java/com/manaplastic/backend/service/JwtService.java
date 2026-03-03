@@ -1,0 +1,142 @@
+package com.manaplastic.backend.service;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@Service
+public class JwtService {
+
+//    // Secret key: tạo trên-https://generate-random.org/encryption-keys
+//    private static final String SECRET_KEY = "288f3daf469d8760689c5fd497669bbc0c41b93d3695ab354b72cabc090034dc"; // sẽ giấu sau
+
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+
+    // tạo TOKEN
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        List<String> roles = userDetails.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+        extraClaims.put("roles", roles);
+        return buildToken(extraClaims, userDetails, 1000*60*15);
+    }
+
+//    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+//        return Jwts.builder()
+//                .setClaims(extraClaims)
+//                .setSubject(userDetails.getUsername())
+//                .setIssuedAt(new Date(System.currentTimeMillis()))
+//                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 1 ngày = 86M400k Mili giây
+//                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+//                .compact();
+//    }
+
+
+//   public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+//        return buildToken(extraClaims, userDetails,  1000*60*15); //15 Phut
+////       return buildToken(extraClaims, userDetails,  1000*20); // test
+//   }
+
+   public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(new HashMap<>(),userDetails, 1000 * 60 * 60 * 24 * 7); // 7 ngay
+   }
+
+   public String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+       return Jwts.builder()
+               .setClaims(extraClaims)
+               .setSubject(userDetails.getUsername())
+               .setIssuedAt(new Date(System.currentTimeMillis()))
+               .setExpiration(new Date(System.currentTimeMillis() + expiration))
+               .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+               .compact();
+   }
+
+    // check TOKEN
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractClaim(token, Claims::getExpiration).before(new Date());
+    }
+
+//    private boolean isTokenExpired(String token) {
+//        return extractExpiration(token).before(new Date());
+//    }
+//
+//    private Date extractExpiration(String token) {
+//        return extractClaim(token, Claims::getExpiration);
+//    }
+
+    // lấy thông tin từ TOKEN
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+//    private Claims extractAllClaims(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(getSignInKey())
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody();
+//    }
+
+    // ký xác nhận bằng key
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+
+     //Tính toán thời gian còn lại (giây) cho đến khi token hết hạn.
+
+    public long getRemainingTokenExpirationSeconds(String token) {
+        try {
+            Date expiration = extractAllClaims(token).getExpiration();
+            long now = new Date().getTime();
+            long expiryTime = expiration.getTime();
+
+            // Tính thời gian còn lại (milliseconds) và chuyển sang seconds
+            if (expiryTime > now) {
+                return TimeUnit.MILLISECONDS.toSeconds(expiryTime - now);
+            }
+            return 0; // Đã hết hạn
+        } catch (Exception e) {
+            // Token không hợp lệ hoặc lỗi parse
+            return 0;
+        }
+    }
+}

@@ -1,0 +1,223 @@
+<div class="app-container">
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo"><span class="material-symbols-outlined">money_bag</span></div>
+        <h1>Cấu Hình Lương</h1>
+        <div class="nav-tabs">
+          <button [class.active]="activeTab === 'rules'" (click)="switchTab('rules')"><i class="fa-solid fa-calculator"></i> Công Thức (Rules)</button>
+          <button [class.active]="activeTab === 'variables'" (click)="switchTab('variables')"><i class="fa-solid fa-database"></i> Biến Số (Variables)</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- RULE VIEW -->
+      <div class="view-panel" *ngIf="activeTab === 'rules'">
+        <aside class="sidebar">
+          <div class="sidebar-header"><span>Danh sách Rule</span><button class="btn-xs btn-primary-outline" (click)="resetRuleEditor()">+ Tạo mới</button></div>
+          <div class="list-container">
+            <div *ngFor="let r of rules" class="list-item" [class.selected]="r.ruleCode === currentRule.ruleCode" (click)="selectRule(r)">
+              <div class="item-head"><span class="code">{{r.ruleCode}}</span><span class="badge">{{r.status}}</span></div>
+              <div class="name">{{r.name}}</div>
+            </div>
+          </div>
+        </aside>
+
+        <main class="editor-area">
+          <div class="editor-toolbar">
+            <div class="info-group">
+              <div class="code-wrapper">
+                <h2 *ngIf="currentRule.ruleId" class="text-rule-code">{{ currentRule.ruleCode }}</h2>
+                <input *ngIf="!currentRule.ruleId" type="text" [(ngModel)]="currentRule.ruleCode" class="input-rule-code" placeholder="Mã Rule (VD: NET_SALARY)">
+                <span class="badge-status">{{currentRule.status}}</span>
+              </div>
+              <input type="text" class="input-invisible" [(ngModel)]="currentRule.name" placeholder="Nhập tên mô tả rule...">
+            </div>
+            <div class="action-group">
+              <div class="mode-switch">
+                <button [class.active]="uiMode === 'formula'" (click)="setRuleMode('formula')">Text</button>
+                <button [class.active]="uiMode === 'visual'" (click)="setRuleMode('visual')">Tree</button>
+                <button [class.active]="uiMode === 'json'" (click)="setRuleMode('json')">Raw</button>
+              </div>
+              <button *ngIf="currentRule.ruleId" class="btn-xs btn-danger-ghost" (click)="deleteRule()">Xóa</button>
+              
+              <!-- CẬP NHẬT: Gọi hàm preSaveRule thay vì saveRule -->
+              <button class="btn-xs btn-primary" (click)="preSaveRule()">Lưu</button>
+            </div>
+          </div>
+
+          <div class="editor-content-wrapper">
+            <div class="canvas">
+              <div class="editor-box formula-mode" *ngIf="uiMode === 'formula'">
+                <div class="box-header">
+                  <label>Soạn thảo công thức</label>
+                  <div class="operators">
+                    <button (click)="insertOperator('+')">+</button><button (click)="insertOperator('-')">-</button>
+                    <button (click)="insertOperator('*')">*</button><button (click)="insertOperator('/')">/</button>
+                    <button (click)="insertOperator('(')">(</button><button (click)="insertOperator(')')">)</button>
+                  </div>
+                </div>
+                <div class="formula-container">
+                  <textarea [(ngModel)]="formulaInput" class="textarea-formula" placeholder="Nhập công thức..."></textarea>
+                  <div class="preview-label">Xem trước:</div>
+                  <div class="formula-preview" [innerHTML]="formattedFormula"></div>
+                </div>
+              </div>
+
+              <div class="editor-box visual-box" *ngIf="uiMode === 'visual'">
+                <ng-container *ngTemplateOutlet="nodeTemplate; context:{$implicit: currentRule.dslJson}"></ng-container>
+              </div>
+
+              <div class="editor-box full-height-editor" *ngIf="uiMode === 'json'">
+                <div class="box-header"><label>Raw JSON DSL</label></div>
+                <textarea [(ngModel)]="jsonInput" class="textarea-json"></textarea>
+              </div>
+            </div>
+
+            <div class="palette">
+              <div class="palette-header">Biến số có sẵn</div>
+              <div class="palette-list">
+                <div *ngFor="let v of variables" class="palette-item" (click)="insertVariable(v.code)">
+                  <span class="var-code">{{v.code}}</span><span class="var-name">{{v.name}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- VARIABLE VIEW -->
+      <div class="view-panel" *ngIf="activeTab === 'variables'">
+        <ng-container *ngTemplateOutlet="variablesView"></ng-container>
+      </div>
+    </div>
+</div>
+
+<ng-template #variablesView>
+    <aside class="sidebar">
+      <div class="sidebar-header"><span>Danh sách Biến</span><button class="btn-xs btn-success-outline" (click)="resetVarEditor()">+ Thêm</button></div>
+      <div class="list-container">
+        <div *ngFor="let v of variables" class="list-item var-item" [class.selected]="v.code === currentVar.code" (click)="selectVar(v)">{{v.code}}</div>
+      </div>
+    </aside>
+    <main class="editor-area var-editor">
+      <div class="var-card">
+        <div class="card-header">
+          <h3>Chi tiết biến số</h3>
+          <div class="mode-switch-sm"><button [class.active]="varMode === 'wizard'" (click)="setVarMode('wizard')">Wizard</button><button [class.active]="varMode === 'sql'" (click)="setVarMode('sql')">SQL</button></div>
+          <div class="actions">
+            <!-- NÚT XÓA: Chỉ hiện khi xem (không sửa) và đã có ID -->
+            <button *ngIf="!isEditingVar && (currentVar.id || currentVar.variableId)" class="btn-xs btn-danger-ghost" (click)="deleteVariable()">Xóa</button>
+            
+            <!-- NÚT SỬA: Chỉ hiện khi xem và đã có ID -->
+            <button *ngIf="!isEditingVar && (currentVar.id || currentVar.variableId)" class="btn-xs btn-primary-outline" (click)="startEditVar()">
+               <i class="fa-solid fa-pen-to-square"></i> Sửa
+            </button>
+
+            <!-- GROUP LƯU/HỦY: Chỉ hiện khi đang sửa -->
+            <ng-container *ngIf="isEditingVar">
+                <button class="btn-xs btn-danger-ghost" (click)="cancelEditVar()">Hủy</button>
+                <button class="btn-xs btn-success" (click)="saveVariable()"><span class="material-symbols-outlined">save</span> Lưu</button>
+            </ng-container>
+          </div>
+        </div>
+        
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group">
+                <label>Mã Biến (Code)</label>
+                <!-- Disabled logic: 
+                     - Nếu không phải chế độ sửa: Khóa
+                     - Nếu đang sửa nhưng là biến cũ (đã có ID): Khóa (không cho sửa Code)
+                     - Chỉ mở khi đang Tạo mới -->
+                <input type="text" [(ngModel)]="currentVar.code" class="input-code" 
+                       [disabled]="!isEditingVar || (currentVar.id !== undefined && currentVar.id !== null)">
+            </div>
+            <div class="form-group">
+                <label>Tên hiển thị</label>
+                <input type="text" [(ngModel)]="currentVar.name" 
+                       [disabled]="!isEditingVar || (currentVar.id !== undefined && currentVar.id !== null)">
+            </div>
+          </div>
+          <div class="form-group full-width" style="margin-bottom: 24px;">
+              <label>Mô tả</label>
+              <input type="text" [(ngModel)]="currentVar.description" placeholder="Nhập mô tả biến..." 
+                     [disabled]="!isEditingVar">
+          </div>
+          
+          <div class="wizard-panel" *ngIf="varMode === 'wizard'">
+            <label><i class="fa-solid fa-wand-magic-sparkles"></i> Chọn mẫu biến có sẵn (Templates)</label>
+            <select [(ngModel)]="wizSource" (change)="onWizSourceChange()" >
+              <option value="">-- Chọn biến để xem công thức --</option>
+              <option *ngFor="let v of variables" [value]="v.code">{{v.name}} ({{v.code}})</option>
+            </select>
+            <div class="wiz-preview" *ngIf="wizResultSql">{{wizResultSql}}</div>
+          </div>
+
+          <div class="sql-panel" [class.hidden]="varMode !== 'sql'">
+            <label>Câu lệnh SQL (Native Query)</label>
+            <div class="codemirror-wrapper"><textarea *ngIf="wizResultSql" [disabled]="!isEditingVar">{{wizResultSql}}</textarea></div>
+            <p class="hint"><i class="fa-solid fa-info-circle"></i> Tham số hỗ trợ: :userId, :startDate, :endDate, :month, :year</p>
+          </div>
+
+          <div class="audit-section">
+            <h4><i class="fa-solid fa-microscope"></i> Kiểm Tra Dữ Liệu (Audit)</h4>
+            <div class="audit-controls">
+              <div class="control-employee">
+                <label>Nhân viên</label>
+                <select [(ngModel)]="simEmployeeId"><option value="">-- Chọn --</option><option *ngFor="let e of employees" [value]="e.userID">{{e.fullname}} - {{e.userID}}</option></select>
+              </div>
+              <div class="control-period"><label>Kỳ lương</label><input type="month" [(ngModel)]="simPeriod"></div>
+              <button class="btn-check" (click)="testVariable()"><span class="material-symbols-outlined">arrow_right</span>Kiểm tra</button>
+            </div>
+            <div class="audit-result" *ngIf="isSimulating || simResult !== '---'">
+              <div class="result-row"><span>Kết quả:</span><strong class="value">{{simResult}}</strong></div>
+              <div class="debug-log">{{simDebug}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+</ng-template>
+
+<ng-template #nodeTemplate let-node>
+    <div class="rb-node" [ngClass]="'type-' + getTypeGroup(node.type)">
+      <div class="rb-header">
+        <select [ngModel]="node.type" (ngModelChange)="updateNodeType(node, $event)">
+          <option *ngFor="let key of objectKeys(RULE_TYPES)" [value]="key">{{RULE_TYPES[key].label}}</option>
+        </select>
+      </div>
+      <div class="rb-body">
+        <ng-container *ngIf="node.type === 'CONSTANT'"><input type="number" [(ngModel)]="node.value" class="rb-input"></ng-container>
+        
+        <!-- CẬP NHẬT: TÁCH RIÊNG LOGIC CHỌN BIẾN VÀ CHỌN RULE (REFERENCE) -->
+        <ng-container *ngIf="node.type === 'VARIABLE'">
+          <select [(ngModel)]="node.name" class="rb-select-var">
+            <option value="">-- Chọn biến --</option>
+            <option *ngIf="node.name" [value]="node.name" hidden>{{node.name}}</option>
+            <option *ngFor="let v of variables" [value]="v.code">{{v.code}} - {{v.name}}</option>
+          </select>
+        </ng-container>
+
+        <ng-container *ngIf="node.type === 'REFERENCE'">
+            <select [(ngModel)]="node.name" class="rb-select-var" style="border-color: #f59e0b; background-color: #fffbeb;">
+              <option value="">-- Chọn Rule tham chiếu --</option>
+              <option *ngIf="node.name" [value]="node.name" hidden>{{node.name}}</option>
+              <!-- Lấy từ danh sách rules thay vì variables -->
+              <option *ngFor="let r of rules" [value]="r.ruleCode">{{r.ruleCode}} - {{r.name}}</option>
+            </select>
+          </ng-container>
+        
+        <ng-container *ngIf="RULE_TYPES[node.type]?.args">
+          <ng-container *ngFor="let arg of RULE_TYPES[node.type].args">
+            <span class="rb-label">{{arg}}</span>
+            <div class="rb-children"><ng-container *ngTemplateOutlet="nodeTemplate; context:{$implicit: node[arg]}"></ng-container></div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+</ng-template>
+
+<app-comfirm *ngIf="isconfirm" [message]="confirmMessage" (result)="onConfirmResult($event)"></app-comfirm>
+
+<app-alert *ngIf="isalert" [message]="alertmessage" [notifyType]="alertType" (hidden)="isalert = false"></app-alert>

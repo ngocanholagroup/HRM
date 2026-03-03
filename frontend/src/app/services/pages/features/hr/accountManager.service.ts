@@ -1,0 +1,47 @@
+import { information } from "../../../../interface/user/user.interface";
+import { api } from "../../../api.service";
+
+
+export async function GetAccountInfo(id: number, role: string, page: number, size: number) {
+    try {
+        const res = await api.get(`/${role.toLowerCase()}/userFilter?page=${page}&size=${size}keyword=${id}`, {});
+        return res.data;
+    } catch (error) {
+        return error;
+    }
+}
+export async function GetOneAccountInfo(id: number | string, role: string,) {
+    try {
+        const res = await api.get(`/${role.toLowerCase()}/userFilter?keyword=${id}`);
+        return res.data;
+    } catch (error) {
+        return error;
+    }
+}
+
+export async function UpdateAccounthr(formdata: information, role: string) {
+    try {
+        const res = await api.put(`/${role.toLowerCase()}/user/${formdata.userID}`, {
+            fullname: formdata.fullname,
+            cccd: formdata.cccd,
+            email: formdata.email,
+            phonenumber: formdata.phonenumber,
+            gender: formdata.gender,
+            birth: formdata.birth,
+            address: formdata.address,
+            bankAccount: formdata.bankAccount,
+            bankName: formdata.bankName,
+            status: formdata.status,
+            hireDate: formdata.hireDate,
+            roleName: formdata.roleName,
+            departmentID: formdata.departmentID
+        });
+        return {
+            data: res.data,
+            status: res.status
+        }
+    } catch (error) {
+        return error;
+
+    }
+}

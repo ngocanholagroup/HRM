@@ -1,0 +1,390 @@
+$primary: #3b82f6;
+$text: #1e293b;
+$border: #e2e8f0;
+$bg: #f8fafc;
+
+.log-page-container {
+    background-color: $bg;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    color: $text;
+    padding: 0.5rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid $border;
+
+    // QUAN TRỌNG: Để dropdown không bị che
+    overflow: visible;
+
+    h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+}
+
+// --- SEARCH BOX & AUTOCOMPLETE STYLES ---
+
+.search-box-wrapper {
+    position: relative; // Để dropdown định vị theo div này
+    display: flex;
+    flex-direction: column;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+
+    input {
+        padding: 8px 12px;
+        border: 1px solid $border;
+        border-radius: 4px;
+        width: 300px; // Tăng width để dễ nhìn hơn
+        transition: border-color 0.2s;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 2px rgba($primary, 0.1);
+        }
+    }
+}
+
+.search-dropdown {
+    position: absolute;
+    top: 100%; // Nằm ngay dưới input
+    left: 0;
+    width: 300px; // Bằng hoặc rộng hơn input
+    background: white;
+    border: 1px solid $border;
+    border-radius: 6px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    z-index: 50; // Đè lên các thành phần khác
+    margin-top: 6px;
+    max-height: 250px;
+    overflow-y: auto;
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid lighten($border, 5%);
+            transition: background 0.15s;
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            &:hover {
+                background-color: #f1f5f9;
+            }
+
+            .user-info-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .user-fullname {
+                font-weight: 500;
+                color: $text;
+                font-size: 14px;
+            }
+
+            .user-username {
+                font-size: 12px;
+                color: #64748b;
+            }
+        }
+    }
+}
+
+// --- END SEARCH STYLES ---
+
+.btn-primary {
+    background: $primary;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+        filter: brightness(90%);
+    }
+}
+
+.data-card {
+    background: white;
+    border: 1px solid $border;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.log-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    th {
+        text-align: left;
+        padding: 12px 16px;
+        background: #f1f5f9;
+        color: #475569;
+        font-weight: 600;
+        border-bottom: 1px solid $border;
+    }
+
+    td {
+        padding: 12px 16px;
+        border-bottom: 1px solid $border;
+        vertical-align: middle;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background: #f8fafc;
+    }
+}
+
+.col-id {
+    color: #64748b;
+    font-family: monospace;
+}
+
+.user-cell {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+
+    .username {
+        font-weight: 500;
+        color: #334155;
+    }
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+// --- Status Colors (UPDATED) ---
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.status-INFO {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    &.status-WARNING {
+        background: #fef9c3;
+        color: #854d0e;
+    }
+
+    &.status-DANGER {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+}
+
+.truncate-text {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #64748b;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    color: #64748b;
+    border-radius: 4px;
+
+    &:hover {
+        background: #f1f5f9;
+        color: $primary;
+    }
+}
+
+.pagination {
+    padding: 15px;
+    border-top: 1px solid $border;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .page-controls button {
+        margin-left: 5px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid $border;
+        background: white;
+        border-radius: 4px;
+
+        &:hover:not(:disabled) {
+            background: #f1f5f9;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// Modal
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: white;
+    width: 600px;
+    max-width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid $border;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #94a3b8;
+        line-height: 1;
+    }
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.detail-row {
+    margin-bottom: 10px;
+    font-size: 14px;
+    border-bottom: 1px dashed #f1f5f9;
+    padding-bottom: 8px;
+}
+
+.detail-block {
+    margin-top: 15px;
+}
+
+.raw-detail-box {
+    width: 100%;
+    height: 200px;
+    margin-top: 5px;
+    padding: 5px;
+    background: #f8fafc;
+    border: 1px solid $border;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #334155;
+    resize: vertical;
+    outline: none;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid $border;
+    text-align: right;
+}
+
+.btn-secondary {
+    background: white;
+    color: #64748b;
+    border: 1px solid $border;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+        background: #f1f5f9;
+    }
+}
+
+.loading-state,
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: #64748b;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #e2e8f0;
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

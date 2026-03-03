@@ -1,0 +1,695 @@
+@use "sass:color";
+
+/* --- COLORS PALETTE --- */
+$bg-body: #f3f4f6;
+$bg-white: #ffffff;
+$primary-blue: #4f46e5;
+$primary-hover: #4338ca;
+$btn-green: #10b981;
+$btn-orange: #f97316;
+/* Màu cho nút chốt lương */
+$btn-orange-hover: #ea580c;
+$text-dark: #1f2937;
+$text-gray: #6b7280;
+$border-light: #e5e7eb;
+
+$badge-rule-bg: #f3e8ff;
+$badge-rule-text: #9333ea;
+$badge-input-bg: #f3f4f6;
+$badge-input-text: #6b7280;
+
+$row-danger-bg: #fef2f2;
+$row-hover: #f9fafb;
+
+/* --- GLOBAL LAYOUT --- */
+:host {
+    display: block;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: $bg-body;
+    min-height: 100vh;
+    color: $text-dark;
+}
+
+.payroll-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* --- HEADER --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: $bg-white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+    border: 1px solid $border-light;
+
+    .brand-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        .logo-box {
+            background: $primary-blue;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .title-group {
+            h1 {
+                margin: 0;
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: #111827;
+            }
+
+            p {
+                margin: 0;
+                font-size: 0.8rem;
+                color: $text-gray;
+            }
+        }
+    }
+}
+
+/* --- LAYOUT GRID --- */
+.layout-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* --- CARDS & SIDEBAR --- */
+.card {
+    background: $bg-white;
+    border-radius: 16px;
+    border: 1px solid $border-light;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    margin-bottom: 24px;
+
+    .card-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+/* Param Card */
+.param-card {
+    .form-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .form-group {
+        flex: 1;
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: $text-gray;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 85%;
+            padding: 10px;
+            border: 1px solid $border-light;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            background: #f9fafb;
+
+            &:focus {
+                outline: none;
+                border-color: $primary-blue;
+                background: #fff;
+            }
+        }
+    }
+
+    // Nút Tính Lương (Cũ)
+    .btn-run-batch {
+        width: 100%;
+        background: $primary-blue;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+        margin-bottom: 12px;
+        /* Thêm margin để cách nút chốt lương */
+
+        &:hover {
+            background: $primary-hover;
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    // Nút Chốt Lương (Mới)
+    .btn-finalize {
+        width: 100%;
+        background: $btn-orange;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+
+        &:hover {
+            background: $btn-orange-hover;
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+}
+
+/* Search Card */
+.search-card {
+    .search-input-group {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid $border-light;
+            border-radius: 8px;
+            background: #f9fafb;
+
+            &:focus {
+                outline: none;
+                border-color: $btn-green;
+                background: #fff;
+            }
+        }
+
+        .btn-search {
+            background: $btn-green;
+            color: white;
+            border: none;
+            width: 42px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+
+            &:hover {
+                background: color.adjust($btn-green, $lightness: -5%);
+            }
+        }
+    }
+
+    .helper-text {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        line-height: 1.4;
+        margin: 0;
+    }
+}
+
+/* --- MAIN CONTENT: RESULT TABLE --- */
+.result-card {
+    padding: 0;
+    overflow: hidden;
+
+    .card-header-row {
+        padding: 16px 24px;
+        border-bottom: 1px solid $border-light;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            h2 {
+                margin: 0;
+                font-size: 1rem;
+                font-weight: 700;
+                color: #374151;
+            }
+
+            i.text-green {
+                color: $btn-green;
+            }
+        }
+
+        .badge-count {
+            font-size: 0.75rem;
+            color: #6b7280;
+            border: 1px solid $border-light;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #f9fafb;
+        }
+    }
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    thead th {
+        background: #ffffff;
+        padding: 14px 24px;
+        text-align: left;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        border-bottom: 1px solid $border-light;
+    }
+
+    tbody tr {
+        border-bottom: 1px solid $border-light;
+        background: white;
+        transition: background 0.1s;
+
+        &:hover {
+            background-color: $row-hover;
+        }
+
+        &.row-highlight-success {
+            background-color: #f0fdf4;
+        }
+
+        &.row-highlight-danger {
+            background-color: $row-danger-bg;
+        }
+    }
+
+    td {
+        padding: 16px 24px;
+        vertical-align: top;
+    }
+}
+
+/* --- COLUMN STYLES --- */
+.col-variable {
+    .var-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .var-code {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: $primary-blue;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .code-salary {
+        color: #059669;
+    }
+
+    .code-tax {
+        color: #dc2626;
+    }
+
+    .code-income {
+        color: #2563eb;
+    }
+
+    .var-desc {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+}
+
+.col-value {
+    text-align: right;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #111827;
+
+    .currency-unit {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        text-decoration: underline;
+    }
+}
+
+/* --- NEW FORMULA BUTTON & COLUMN --- */
+.col-formula {
+    .btn-view-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background-color: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: #374151;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        .material-symbols-outlined {
+            font-size: 16px;
+            color: $primary-blue;
+        }
+
+        &:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+            color: $primary-blue;
+        }
+    }
+
+    .mini-desc {
+        margin-top: 4px;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-style: italic;
+    }
+}
+
+/* --- MODAL STYLES (NEW) --- */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal-panel {
+    background: white;
+    width: 90%;
+    max-width: 900px;
+    max-height: 85vh;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    animation: scaleIn 0.2s ease-out;
+
+    .modal-header {
+        padding: 16px 24px;
+        border-bottom: 1px solid $border-light;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+
+        .modal-title-group {
+            h3 {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: $text-dark;
+            }
+
+            .modal-subtitle {
+                font-size: 0.85rem;
+                color: $primary-blue;
+                font-weight: 600;
+                margin-top: 2px;
+                display: block;
+            }
+        }
+
+        .btn-close-modal {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #9ca3af;
+
+            &:hover {
+                color: #ef4444;
+            }
+        }
+    }
+
+    .modal-body {
+        padding: 24px;
+        overflow-y: auto;
+        background: #f8fafc;
+    }
+
+    .modal-footer {
+        padding: 16px 24px;
+        border-top: 1px solid $border-light;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+
+        .footer-info {
+            font-size: 0.9rem;
+            color: $text-dark;
+        }
+
+        .btn-primary {
+            background: $primary-blue;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+
+            &:hover {
+                background: $primary-hover;
+            }
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* --- DYNAMIC HTML CONTENT (DSL) --- */
+::ng-deep {
+
+    /* Badges */
+    .badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-rule {
+        background: $badge-rule-bg;
+        color: $badge-rule-text;
+    }
+
+    .badge-input {
+        background: $badge-input-bg;
+        color: $badge-input-text;
+        border: 1px solid #e5e7eb;
+    }
+
+    /* DSL Container */
+    .dsl-container {
+        font-size: 0.85rem;
+        line-height: 1.8;
+
+        /* Modal Large View */
+        &.large-view {
+            font-size: 1rem;
+            /* Bigger font in modal */
+            line-height: 2;
+        }
+    }
+
+    /* Variables inside formula */
+    .dsl-container span[style*="background"] {
+        background-color: #eff6ff !important;
+        color: #2563eb !important;
+        border: 1px solid #dbeafe !important;
+        padding: 2px 6px !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+        font-family: 'Segoe UI', sans-serif !important;
+        font-size: 0.9em !important;
+        /* Slightly larger */
+        cursor: default;
+    }
+
+    /* Constant values inside formula */
+    .dsl-container span[style*="color:#059669"] {
+        color: #059669 !important;
+        font-weight: bold;
+    }
+
+    /* Math Operators */
+    .math-op {
+        font-weight: 900;
+        margin: 0 4px;
+    }
+
+    .op-add {
+        color: #10b981;
+    }
+
+    .op-sub {
+        color: #ef4444;
+    }
+
+    .op-mul {
+        color: #3b82f6;
+    }
+
+    /* --- LOGIC TREE (IF/ELSE) --- */
+    .logic-tree {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.9em;
+        margin-top: 8px;
+
+        .logic-branch {
+            position: relative;
+            padding: 6px 0;
+        }
+
+        /* Indentation Lines */
+        .logic-branch[style*="padding-left:16px"] {
+            padding-left: 24px !important;
+
+            &[style*="border-left:1px solid #86efac"] {
+                border-left: 3px solid #86efac !important;
+            }
+
+            &[style*="border-left:1px solid #fca5a5"] {
+                border-left: 3px solid #fca5a5 !important;
+            }
+        }
+    }
+
+    /* Logic Labels */
+    .logic-label {
+        display: inline-block;
+        width: 40px;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 3px 0;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .label-if {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    .label-then {
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+
+    .label-else {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    /* SQL Tooltip override for Modal */
+    .sql-tooltip {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 8px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        margin-top: 8px;
+    }
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 1024px) {
+    .layout-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .sidebar {
+        display: flex;
+        gap: 16px;
+
+        .card {
+            flex: 1;
+            margin-bottom: 0;
+        }
+    }
+}

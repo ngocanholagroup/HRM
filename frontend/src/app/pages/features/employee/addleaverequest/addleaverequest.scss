@@ -1,0 +1,208 @@
+// --- Variables (Biến màu) ---
+$primary-color: #007bff;
+$primary-hover: #0056b3;
+$text-main: #333;
+$text-light: #666;
+$border-color: #e2e8f0;
+$bg-header: #fff;
+$radius: 8px;
+$shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+/* Overlay */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* Modal Box */
+.modal-box {
+    width: 100%;
+    max-width: 800px;
+    max-height: 98vh;
+    background: #fff;
+    border-radius: $radius;
+    display: flex;
+    flex-direction: column;
+    box-shadow: $shadow;
+    position: relative;
+
+    // Animation
+    &.modal-animate {
+        animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: $bg-header;
+    padding: 15px 25px;
+    border-bottom: 1px solid $border-color;
+    border-radius: $radius $radius 0 0;
+
+    h3 {
+        margin: 0;
+        font-size: 26px;
+        font-weight: 600;
+        color: $text-main;
+    }
+
+    .close-icon {
+        cursor: pointer;
+        font-size: 30px;
+        color: #94a3b8;
+        padding: 4px;
+        border-radius: 50%;
+        transition: all 0.2s;
+
+        &:hover {
+            background: #f1f5f9;
+            color: $text-main;
+        }
+    }
+}
+
+/* Body */
+.modal-body {
+    flex: 1;
+    padding: 20px 25px;
+    overflow-y: auto;
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 15px;
+
+        label {
+            font-weight: 600;
+            color: $text-main;
+            margin-bottom: 6px;
+            font-size: 23px;
+        }
+
+        .required {
+            color: #ef4444;
+            margin-left: 3px;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 8px 12px;
+            font-size: 23px;
+            border: 1px solid $border-color;
+            border-radius: 4px;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            outline: none;
+            color: $text-main;
+            height: 50px;
+
+            &:hover {
+                border-color: #cbd5e1;
+            }
+
+            &:focus {
+                border-color: $primary-color;
+                box-shadow: 0 0 0 2px rgba($primary-color, 0.15);
+            }
+
+            // Style cho input khi invalid nhưng đã touched (tùy chọn)
+            &.ng-invalid.ng-touched {
+                border-color: #ef4444;
+            }
+        }
+
+        textarea {
+            height: auto;
+            resize: none;
+            min-height: 100px;
+            font-family: inherit;
+        }
+    }
+
+    .row-group {
+        display: block;
+    }
+}
+
+/* Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 15px 25px;
+    border-top: 1px solid $border-color;
+    background: #f8fafc;
+    border-radius: 0 0 $radius $radius;
+
+    .btn {
+        min-width: 100px;
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 23px;
+        transition: all 0.2s;
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        &.btn-primary {
+            background: $primary-color;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+            &:hover {
+                background: $primary-hover;
+            }
+
+            // Style cho trạng thái disabled
+            &:disabled {
+                background: #94a3b8; // Màu xám
+                cursor: not-allowed;
+                box-shadow: none;
+                transform: none;
+                opacity: 0.7;
+            }
+        }
+
+        &.btn-cancel {
+            background: #fff;
+            border: 1px solid $border-color;
+            color: $text-light;
+
+            &:hover {
+                background: #f1f5f9;
+                color: $text-main;
+                border-color: #cbd5e1;
+            }
+        }
+    }
+}

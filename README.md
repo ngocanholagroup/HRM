@@ -1,63 +1,62 @@
-# Đồ án tốt nghiệp: Website Quản Lý Nhân Sự MANAPlastic
+# Hệ Thống Quản Lý Nhân Sự Hola Group (HRM)
 
-> **Mô tả:** Dự án xây dựng Website quản lý nhân sự cho công ty sản xuất bao bì nhựa MANAPlastic, tích hợp ứng dụng chấm công QR Code.
+> **Mô tả:** Giải pháp quản lý nhân sự chuyên sâu được thiết kế riêng cho hệ sinh thái của Hola Group, hỗ trợ quản lý vận hành sản xuất và tích hợp công nghệ chấm công thông minh qua mã QR Code.
 
-* **Live Demo - Sponsor By Hola Group:** [https://erpmini.cloud](https://erpmini.cloud)
-* **Timesheet theo dõi tiến độ:** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1Ouz-jxjV6gg4vwenk94TxB3wv66ZlYrlJ33Hpq8s_h8/edit?gid=0#gid=0)
-
----
-
-## 👥 Thành viên thực hiện
-
-| Họ tên | Vai trò | Trách nhiệm |
-| :--- | :--- | :--- |
-| **Phạm Minh Anh** | Leader | Backend (Spring Boot) |
-| **Nguyễn Ngọc Ân** | Member | Frontend (Angular) |
-
-**Giảng viên hướng dẫn:** Thầy Nguyễn Minh Sang (Lecturer at FPT University)
+## 🌐 Liên kết dự án
+* **Hệ thống thực tế (Live Demo):** [https://erpmini.cloud](https://erpmini.cloud)
+* **Theo dõi tiến độ dự án:** [Google Spreadsheet](https://docs.google.com/spreadsheets/d/1Ouz-jxjV6gg4vwenk94TxB3wv66ZlYrlJ33Hpq8s_h8/edit?gid=0#gid=0)
 
 ---
 
-## 🔐 Tài khoản đăng nhập (Demo)
+## 👥 Đơn vị vận hành và Phát triển
 
-| Quyền hạn | Username | Password |
+| Tổ chức | Vai trò | Trách nhiệm |
 | :--- | :--- | :--- |
-| **Admin** | `admin` | `admin123` |
-| **HR Manager** | `hr_manager` | `hr123` |
-| **Quản Lý (Lead)** | `inan_lead` | `ql123` |
+| **Hola Group** | Đơn vị chủ quản | Định hướng và vận hành hệ thống |
+| **HRM Technical Team** | Đội ngũ kỹ thuật | Phát triển Fullstack (Angular & Spring Boot) |
+
+---
+
+## 🔐 Tài khoản truy cập hệ thống (Demo)
+
+| Quyền hạn | Tên đăng nhập | Mật khẩu |
+| :--- | :--- | :--- |
+| **Quản trị viên (Admin)** | `admin` | `admin123` |
+| **Quản lý nhân sự (HR)** | `hr_manager` | `hr123` |
+| **Quản lý bộ phận (Lead)** | `inan_lead` | `ql123` |
 | **Nhân viên** | `000050` | `123123` |
 
 ---
 
-## ⚙️ Hướng dẫn cài đặt
+## ⚙️ Quy trình cài đặt và Triển khai
 
-### Bước 1: Build Frontend (Angular)
-1.  Vào thư mục `frontend`, mở terminal và chạy lần lượt các lệnh:
+### Bước 1: Đóng gói Giao diện (Frontend - Angular)
+1.  Truy cập vào thư mục `frontend`, mở terminal và thực hiện:
     ```bash
     npm i
     ng build
     ```
-2.  Sau khi build xong, vào thư mục `/dist/Fe_luanvan`.
-3.  Copy **toàn bộ** nội dung bên trong (bao gồm cả các thư mục con của `/browser`) ra bên ngoài cùng cấp với `/browser`.
-4.  Copy và dán toàn bộ thư mục đó vào đường dẫn Backend:
-    `\MANAPlastic_HR_Project\backend\src\main\resources\static`
+2.  Sau khi quá trình build hoàn tất, truy cập thư mục `/dist/Fe_luanvan`.
+3.  Sao chép toàn bộ nội dung trong thư mục con `/browser` ra thư mục gốc của bản build.
+4.  Chuyển toàn bộ dữ liệu này vào thư mục tài nguyên của Backend tại:
+    `\backend\src\main\resources\static`
 
-### Bước 2: Cấu hình Backend (Spring Boot)
-Mở file `application.properties` tại đường dẫn:
-`\MANAPlastic_HR_Project\backend\src\main\resources\application.properties`
+### Bước 2: Cấu hình Hệ thống (Backend - Spring Boot)
+Chỉnh sửa tệp `application.properties` tại đường dẫn:
+`\backend\src\main\resources\application.properties`
 
-Cập nhật cấu hình như sau:
+Cập nhật các thông số môi trường sau:
 
 ```properties
-# Server
+# Cấu hình Server
 server.port=8080
 server.address=0.0.0.0
 
-# Database Configuration
+# Cấu hình Cơ sở dữ liệu (MySQL)
 spring.datasource.url=jdbc:mysql://localhost:3306/manaplastic_hr
 spring.datasource.username=root
-spring.datasource.password=
+spring.datasource.password=your_password_here
 
-# Email Sender Configuration
-spring.mail.username=gmail_cua_ban@gmail.com
-spring.mail.password=pass_key_app_cua_ban
+# Cấu hình hệ thống gửi Email (SMTP)
+spring.mail.username=contact@holagroup.com
+spring.mail.password=your_app_password
